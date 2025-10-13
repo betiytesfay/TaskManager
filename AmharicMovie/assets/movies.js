@@ -1,0 +1,192 @@
+export const movies = [
+  {
+    id: "lEEBwcK7dCk",
+    title: "Lebam ልባም (Ethiopian Full Movie 2025 | Drama) ሙሉ ፊልም",
+    describtion: "1. A Tragic Love Story A heart-touching tale about a sincere young woman whose life changes forever after a tragic car accident involving Michael, a dedicated athlete training for the World Championship. Their unexpected encounter sets both their lives on a new, emotional path",
+    thumbnail: "https://i.ytimg.com/vi/lEEBwcK7dCk/hqdefault.jpg",
+
+  },
+  {
+    id: "718Y6KtToxk",
+    title: "ዘውድ እና ጎፈር 2 ሙሉ ፊልም | Zewd Ena Gofer 2 ",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/718Y6KtToxk/hqdefault.jpg",
+  },
+  {
+    id: "SxVyFHDyrRI",
+    title: "ጥላዬ ሙሉ ፊልም |Telaye full Amharic movie 2022 |New Ethiopian Amharic movie",
+    describtion: "",
+    thumbnail: "https://img.youtube.com/vi/SxVyFHDyrRI/hqdefault.jpg",
+  },
+  {
+    id: "phmIAGUlKVg",
+    title: "ወዳጅ ሙሉ ፊልም | Wedaj | Full Length Ethiopian Movie 2023",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/phmIAGUlKVg/hqdefault.jpg",
+  },
+  {
+    id: "u4n1bBSWPHY",
+    title: "ወይኔ የአራዳ ልጅ 5 ሙሉ ፊልም - Wayne Yarada Lij 5 Full Movie 2020 ",
+    describtion: "",
+    thumbnail: "https://img.youtube.com/vi/u4n1bBSWPHY/hqdefault.jpg",
+  },
+  {
+    id: "WIJU3F5Vrmc",
+    title: "ባለ ክራር - new ethiopian full movie 2024",
+    describtion: "",
+    thumbnail: "https://img.youtube.com/vi/WIJU3F5Vrmc/hqdefault.jpg",
+  },
+  {
+    id: "EFxMJLQ6d6E",
+    title: "Yewendoch Guday 1 (የወንዶች ጉዳይ 1) - Ethiopian Romantic Comedy Film",
+    describtion: "",
+    thumbnail: "https://img.youtube.com/vi/EFxMJLQ6d6E/hqdefault.jpg",
+  },
+  {
+    id: "biZK5btW4tc",
+    title: "አንድ እኩል ሙሉ ፊልም And Ekul full Ethiopian film 2019 ",
+    describtion: "",
+    thumbnail: "https://img.youtube.com/vi/biZK5btW4tc/hqdefault.jpg",
+  },
+  {
+    id: "fvJPyz1qb_Q",
+    title: "New Ethiopian Movie - Tilefegn 2016 Full movie (ጥለፈኝ ሙሉ ፊልም) ",
+    describtion: "",
+    thumbnail: "https://img.youtube.com/vi/fvJPyz1qb_Q/hqdefault.jpg",
+  },
+  {
+    id: "TvDq_CUmQMQ",
+    title: "የፍቅር ጥግ ሙሉ ፊልም - Yefikir Tig Full Amharic Movie 2022 ",
+    describtion: "",
+    thumbnail: "https://img.youtube.com/vi/TvDq_CUmQMQ/hqdefault.jpg",
+  },
+  {
+    id: "19jBWv6-iFo",
+    title: "እውነታ ሙሉ ፊልም - Eweneta Ethiopian Movie 2017",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/19jBWv6-iFohqdefault.jpg",
+  },
+  {
+    id: "jmLi-nU2jmI",
+    title: "ኪያ ሙሉ ፊልም Kiya full Ethiopian movie 2020 ",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/jmLi-nU2jmI/hqdefault.jpg",
+  },
+  {
+    id: "Dosqgw_iENA",
+    title: "ፖለቲካ አይደለም Ethiopian Movie - 2018 ሙሉፊልም",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/Dosqgw_iENA/hqdefault.jpg",
+  },
+  {
+    id: "E-BBWNQ3D9Q",
+    title: "FBI Part 2 - Full Amharic Film",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/E-BBWNQ3D9Q/hqdefault.jpg",
+  },
+  {
+    id: "v2xHkYnM58M",
+    title: "የፍቅር ሰው - Yefiker Sew New Ethiopian Movie 2020",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/v2xHkYnM58M/hqdefault.jpg",
+  },
+  {
+    id: "kb9BfQT7bHQ",
+    title: "Hiwet Bedereja (ህይወት በደረጃ)",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/kb9BfQT7bHQ/hqdefault.jpg",
+  },
+  {
+    id: "SpLt_HipVew",
+    title: " Chombe (ቾምቤ) - Ethiopian Film 2016 ",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/SpLt_HipVew/hqdefault.jpg",
+  },
+  {
+    id: "6Hi-E-vpqb0&list",
+    title: "ፍልሚያ ሙሉ ፊልም | Felmiya Full Amharic movie",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/6Hi-E-vpqb0&list/hqdefault.jpg",
+  },
+  {
+    id: "NXn5_uxoBmw",
+    title: "YeSilet Lij (የስለት ልጅ) Ethiopian Movie",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/NXn5_uxoBmw/hqdefault.jpg",
+  },
+  {
+    id: "oviMZvc6LD0",
+    title: "ባለቀ ሰዓት ሙሉ ፊልም ( Baleke Seate) 2024",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/oviMZvc6LD0/hqdefault.jpg",
+  },
+  {
+    id: "gnB1dLM0bIs",
+    title: "ህጋዊ ድሃ ሙሉ ፊልም | Hgawi Deha | New Ethiopian Movie 2024",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/718Y6KtToxk/hqdefault.jpg",
+  },
+  {
+    id: "718Y6KtToxk",
+    title: "ዘውድ እና ጎፈር 2 ሙሉ ፊልም | Zewd Ena Gofer 2 ",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/718Y6KtToxk/hqdefault.jpg",
+  },
+  {
+    id: "718Y6KtToxk",
+    title: "ዘውድ እና ጎፈር 2 ሙሉ ፊልም | Zewd Ena Gofer 2 ",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/718Y6KtToxk/hqdefault.jpg",
+  },
+  {
+    id: "718Y6KtToxk",
+    title: "ዘውድ እና ጎፈር 2 ሙሉ ፊልም | Zewd Ena Gofer 2 ",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/718Y6KtToxk/hqdefault.jpg",
+  },
+  {
+    id: "718Y6KtToxk",
+    title: "ዘውድ እና ጎፈር 2 ሙሉ ፊልም | Zewd Ena Gofer 2 ",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/718Y6KtToxk/hqdefault.jpg",
+  },
+  {
+    id: "718Y6KtToxk",
+    title: "ዘውድ እና ጎፈር 2 ሙሉ ፊልም | Zewd Ena Gofer 2 ",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/718Y6KtToxk/hqdefault.jpg",
+  },
+  {
+    id: "718Y6KtToxk",
+    title: "ዘውድ እና ጎፈር 2 ሙሉ ፊልም | Zewd Ena Gofer 2 ",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/718Y6KtToxk/hqdefault.jpg",
+  },
+  {
+    id: "718Y6KtToxk",
+    title: "ዘውድ እና ጎፈር 2 ሙሉ ፊልም | Zewd Ena Gofer 2 ",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/718Y6KtToxk/hqdefault.jpg",
+  },
+  {
+    id: "718Y6KtToxk",
+    title: "ዘውድ እና ጎፈር 2 ሙሉ ፊልም | Zewd Ena Gofer 2 ",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/718Y6KtToxk/hqdefault.jpg",
+  },
+  {
+    id: "718Y6KtToxk",
+    title: "ዘውድ እና ጎፈር 2 ሙሉ ፊልም | Zewd Ena Gofer 2 ",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/718Y6KtToxk/hqdefault.jpg",
+  },
+  {
+    id: "718Y6KtToxk",
+    title: "ዘውድ እና ጎፈር 2 ሙሉ ፊልም | Zewd Ena Gofer 2 ",
+    describtion: "",
+    thumbnail: "https://i.ytimg.com/vi/718Y6KtToxk/hqdefault.jpg",
+  },
+  {
+
+  }
+]

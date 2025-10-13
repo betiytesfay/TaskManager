@@ -1,0 +1,345 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { useEffect, useState } from 'react';
+import { Dimensions, FlatList, Image, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { WebView } from 'react-native-webview';
+
+
+
+// Movie item component
+const MovieItem = ({ item, onPress }) => (
+  <Pressable style={styles.itemContainer} onPress={() => onPress(item)}>
+    <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
+    <View style={styles.textContainer}>
+      <Text style={styles.title}>{item.title}</Text>
+    </View>
+  </Pressable>
+);
+
+
+function MediaList({ type, keyword }) {
+  const [activeTab, setActiveTab] = useState('inApp');
+  const [filters, setFilters] = useState({
+    year: null,
+    rating: null,
+    genre: null,
+    keyword: '',
+  });
+  const [showFilter, setShowFilter] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
+  const [screenHeight, setScreenHeight] = useState(Dimensions.get('window').height);
+
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener('change', ({ window: { width, height } }) => {
+      setScreenWidth(width);
+      setScreenHeight(height);
+    });
+    return () => subscription?.remove();
+  }, []);
+
+
+
+  useEffect(() => {
+    fetch('https://amharicmovie-backend.onrender.com/movies')
+      .then(res => {
+        console.log('Response status:', res.status);
+        return res.json();
+      })
+      .then(data => {
+        setMovies(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.log('Fetch error:', err);
+        setLoading(false);
+      });
+  }, []);
+  const filterMovies = (moviesList) => {
+    return moviesList.filter(movie => {
+      if (filters.year && movie.year !== filters.year) return false;
+      if (filters.rating && movie.rating < filters.rating) return false;
+      if (filters.genre && !movie.genre.includes(filters.genre)) return false;
+      if (filters.keyword && !movie.title.toLowerCase().includes(filters.keyword.toLowerCase())) return false;
+      return true;
+    });
+  };
+
+
+
+  const openVideo = (movie) => {
+    setSelectedMovie(movie); // 
+  };
+
+  const closeVideo = () => {
+    setSelectedMovie(null);
+  };
+
+  if (loading) return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Loading movies...</Text>
+    </View>
+  );
+  const displayedMovies = filterMovies(
+    movies.filter(m =>
+      type === 'all' ? true :
+        type === 'movie' ? m.type === 'movie' :
+          type === 'tvSeries' ? m.type === 'tvSeries' : true
+    ).filter(m =>
+      activeTab === 'inApp' ? m.source === 'in-app' :
+        activeTab === 'youtube' ? m.source === 'youtube' : true
+    )
+  );
+
+
+  return (
+    <View style={{ flex: 1 }}>
+
+
+      {/* Tab buttons */}
+      <View style={{ flexDirection: 'row' }}>
+        <Pressable onPress={() => setActiveTab('inApp')} style={{ margin: 5, padding: 10, backgroundColor: activeTab === 'inApp' ? 'purple' : 'black', boxSizing: 20, borderRadius: 10 }}>
+          <Text style={{ color: 'white' }}>In App</Text>
+        </Pressable>
+        <Pressable onPress={() => setActiveTab('youtube')} style={{ margin: 5, padding: 10, backgroundColor: activeTab === 'youtube' ? 'purple' : 'black', borderRadius: 10 }}>
+          <Text style={{ color: 'white' }}>YouTube Only</Text>
+        </Pressable>
+        <Pressable onPress={() => setShowFilter(!showFilter)}
+          style={{ margin: 5, padding: 10, backgroundColor: 'purple', borderRadius: 10, marginLeft: 115 }}>
+          <MaterialCommunityIcons name="menu" size={30} color="white" />
+        </Pressable>
+      </View>
+
+
+      {/* Movie list */}
+
+      {showFilter && (<View style={{ backgroundColor: 'black', padding: 10 }}>
+        <Text></Text>
+        <Text style={{ color: 'white' }}> Year</Text>
+        <Text>year</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          {['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'].map(year => (
+            <Pressable
+              key={year}
+              onPress={() => setFilters({ ...filters, year })}
+              style={{
+                padding: 10,
+                borderRadius: 10,
+                backgroundColor: filters.year === year ? 'purple' : '#222',
+
+              }}>
+              <Text style={{ color: 'white' }}> {year}</Text>
+            </Pressable>
+          )
+
+          )}
+
+        </View>
+        {/* Genre Filter */}
+        <Text style={{ color: 'white', marginVertical: 5 }}>Genre</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          {['Action', 'Romance', 'Comedy', 'Drama'].map(genre => (
+            <Pressable
+              key={genre}
+              onPress={() => setFilters({ ...filters, genre })}
+              style={{
+                padding: 10,
+                borderRadius: 8,
+                backgroundColor: filters.genre === genre ? 'purple' : '#222',
+                margin: 5,
+              }}
+            >
+              <Text style={{ color: 'white' }}>{genre}</Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {/* Apply / Close */}
+        <Pressable
+          onPress={() => setShowFilter(false)}
+          style={{ backgroundColor: 'purple', padding: 12, borderRadius: 8, marginTop: 15 }}
+        >
+          <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Apply Filters</Text>
+        </Pressable>
+      </View>
+      )}
+
+
+
+
+      {!selectedMovie && (
+        <FlatList
+          data={movies.filter(m =>
+            activeTab === 'inApp' ? m.source === 'in-app' :
+              activeTab === 'youtube' ? m.source === 'youtube' : true
+          )}
+
+          keyExtractor={item => item._id}
+          renderItem={({ item }) => <MovieItem item={item} onPress={openVideo} />}
+        />
+      )}
+
+      {/* Movie list */}
+
+
+      {/* Fullscreen video */}
+      {selectedMovie && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'black',
+            zIndex: 1000,
+          }}
+        >
+          <WebView
+            source={{ uri: selectedMovie.url.replace('watch?v=', 'embed/') + '?modestbranding=1&playsinline=1' }}
+            style={{ width: screenWidth, height: screenHeight }}
+            javaScriptEnabled
+            domStorageEnabled
+            allowsFullscreenVideo
+            scalesPageToFit={true}
+            mediaPlaybackRequiresUserAction={false}
+            cacheEnabled={true}
+          />
+          <Pressable
+            onPress={closeVideo}
+            style={{
+              position: 'absolute',
+              top: 40,
+              right: 20,
+              backgroundColor: 'red',
+              padding: 10,
+              borderRadius: 8,
+            }}
+          >
+            <Text style={{ color: 'white', textAlign: 'center' }}>Close</Text>
+          </Pressable>
+        </View>
+      )}
+    </View>
+  );
+}
+
+
+
+// Screens
+function MusicScreen() {
+  return (
+    <View style={styles.container}>
+      <Text>Music</Text>
+    </View>
+  );
+}
+
+function MeScreen() {
+  return (
+    <View style={styles.container}>
+      <Text>Me</Text>
+    </View>
+  );
+}
+
+function DownloadScreen() {
+  return (
+    <View style={styles.container}>
+      <Text>Download</Text>
+    </View>
+  );
+}
+
+const TopTab = createMaterialTopTabNavigator();
+
+function MoviesTopTabs() {
+  const [showSearch, setShowSearch] = useState(false);
+  const [keyword, setKeyword] = useState('');
+  const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
+      {/* Header */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10 }}>
+        <Pressable onPress={() => {
+          setKeyword('');
+          setShowSearch(false);
+        }}>
+          <Text style={{ color: 'white', fontSize: 22, fontWeight: 'bold' }}>MINIYT</Text>
+        </Pressable>
+        <Pressable onPress={() => setShowSearch(prev => !prev)}>
+          <MaterialCommunityIcons name="magnify" size={26} color="white" />
+        </Pressable>
+
+      </View>
+      {showSearch && (
+        <TextInput
+          style={{
+            height: 40,
+            borderColor: 'gray',
+            borderWidth: 1,
+            margin: 10,
+            paddingHorizontal: 8,
+            borderRadius: 10,
+            color: 'white',
+            backgroundColor: '#222',
+          }}
+          placeholder="Search..."
+          placeholderTextColor="lightgray"
+          value={keyword}
+          onChangeText={text => setKeyword(text)}
+        />
+      )}
+
+
+      {/* Top Tabs */}
+      <TopTab.Navigator
+        screenOptions={{
+          tabBarActiveTintColor: 'white',
+          tabBarInactiveTintColor: 'gray',
+          tabBarStyle: { backgroundColor: 'black' },
+          tabBarIndicatorStyle: { backgroundColor: 'purple' },
+        }}
+      >
+        <TopTab.Screen name="All" options={{ title: 'All' }}>
+          {() => <MediaList type="all" keyword={keyword} />}
+        </TopTab.Screen>
+        <TopTab.Screen name="Movie" options={{ title: 'Movie' }}>
+          {() => <MediaList type="movie" keyword={keyword} />}
+        </TopTab.Screen>
+        <TopTab.Screen name="TVSeries" options={{ title: 'TV / Series' }}>
+          {() => <MediaList type="tvseries" keyword={keyword} />}
+        </TopTab.Screen>
+      </TopTab.Navigator>
+    </SafeAreaView>
+  );
+}
+
+
+
+// Bottom tab
+const Tab = createBottomTabNavigator();
+export default function App() {
+  return (
+    <Tab.Navigator>
+      <Tab.Screen name="Movies" component={MoviesTopTabs} options={{ headerShown: false }} />
+      <Tab.Screen name="Music" component={MusicScreen} />
+      <Tab.Screen name="Me" component={MeScreen} />
+      <Tab.Screen name="Download" component={DownloadScreen} />
+    </Tab.Navigator>
+  );
+}
+
+
+const styles = StyleSheet.create({
+  thumbnail: { width: 120, height: 70 },
+  title: { fontWeight: 'bold', fontSize: 16, marginBottom: 3, color: 'white' },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  itemContainer: { flexDirection: 'row', marginBottom: 10 },
+  textContainer: { flex: 1, justifyContent: 'center', marginLeft: 10 }
+
+});
