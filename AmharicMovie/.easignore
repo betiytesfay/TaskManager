@@ -1,12 +1,12 @@
-# Ignore system files
+# Ignore system and temp files
 AppData/
-C:/Users/beti/AppData/Local/
-C:/Users/beti/AppData/Local/Temp/
-
-# Node modules
-node_modules/
-
-# Logs and OS metadata
+Local Settings/
+Cookies/
+My Documents/
+Desktop/
+Downloads/
+Temp/
+*.tmp
 *.log
-.DS_Store
-Thumbs.db
+*.bak
+node_modules/
