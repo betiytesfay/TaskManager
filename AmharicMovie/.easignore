@@ -1,0 +1,12 @@
+# Ignore system files
+AppData/
+C:/Users/beti/AppData/Local/
+C:/Users/beti/AppData/Local/Temp/
+
+# Node modules
+node_modules/
+
+# Logs and OS metadata
+*.log
+.DS_Store
+Thumbs.db
