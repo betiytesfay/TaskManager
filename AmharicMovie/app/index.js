@@ -1,22 +1,12 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
-import { Dimensions, FlatList, Image, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { WebView } from 'react-native-webview';
-
-
-
+import { Dimensions, FlatList, Linking, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
+import YoutubePlayer from 'react-native-youtube-iframe';
+import MovieCard from '../components/MovieCard';
 // Movie item component
-const MovieItem = ({ item, onPress }) => (
-  <Pressable style={styles.itemContainer} onPress={() => onPress(item)}>
-    <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
-    <View style={styles.textContainer}>
-      <Text style={styles.title}>{item.title}</Text>
-    </View>
-  </Pressable>
-);
-
 
 function MediaList({ type, keyword }) {
   const [activeTab, setActiveTab] = useState('inApp');
@@ -28,6 +18,7 @@ function MediaList({ type, keyword }) {
   });
   const [showFilter, setShowFilter] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
+  const [webviewError, setWebviewError] = useState(false);
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
@@ -58,6 +49,7 @@ function MediaList({ type, keyword }) {
         setLoading(false);
       });
   }, []);
+
   const filterMovies = (moviesList) => {
     return moviesList.filter(movie => {
       if (filters.year && movie.year !== filters.year) return false;
@@ -68,14 +60,34 @@ function MediaList({ type, keyword }) {
     });
   };
 
-
-
   const openVideo = (movie) => {
     setSelectedMovie(movie); // 
+    setWebviewError(false);
   };
 
   const closeVideo = () => {
     setSelectedMovie(null);
+  };
+
+  const openInYouTube = async (url) => {
+    try {
+      const id = getVideoId(url);
+      if (id) {
+        const appUrl = `vnd.youtube:${id}`;
+        const webUrl = `https://www.youtube.com/watch?v=${id}`;
+        const supported = await Linking.canOpenURL(appUrl);
+        if (supported) {
+          await Linking.openURL(appUrl);
+          return;
+        }
+        await Linking.openURL(webUrl);
+        return;
+      }
+      await Linking.openURL(url);
+    } catch (e) {
+      console.log('openInYouTube error', e);
+      try { await Linking.openURL(url); } catch (err) { console.log('fallback linking error', err); }
+    }
   };
 
   if (loading) return (
@@ -96,19 +108,19 @@ function MediaList({ type, keyword }) {
 
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: 'black' }}>
 
 
       {/* Tab buttons */}
       <View style={{ flexDirection: 'row' }}>
-        <Pressable onPress={() => setActiveTab('inApp')} style={{ margin: 5, padding: 10, backgroundColor: activeTab === 'inApp' ? 'purple' : 'black', boxSizing: 20, borderRadius: 10 }}>
+        <Pressable onPress={() => setActiveTab('inApp')} style={{ margin: 5, padding: 10, backgroundColor: activeTab === 'inApp' ? 'red' : 'black', boxSizing: 20, borderRadius: 10 }}>
           <Text style={{ color: 'white' }}>In App</Text>
         </Pressable>
-        <Pressable onPress={() => setActiveTab('youtube')} style={{ margin: 5, padding: 10, backgroundColor: activeTab === 'youtube' ? 'purple' : 'black', borderRadius: 10 }}>
+        <Pressable onPress={() => setActiveTab('youtube')} style={{ margin: 5, padding: 10, backgroundColor: activeTab === 'youtube' ? 'red' : 'black', borderRadius: 10 }}>
           <Text style={{ color: 'white' }}>YouTube Only</Text>
         </Pressable>
         <Pressable onPress={() => setShowFilter(!showFilter)}
-          style={{ margin: 5, padding: 10, backgroundColor: 'purple', borderRadius: 10, marginLeft: 115 }}>
+          style={{ margin: 5, padding: 10, backgroundColor: 'red', borderRadius: 10, marginLeft: 115 }}>
           <MaterialCommunityIcons name="menu" size={30} color="white" />
         </Pressable>
       </View>
@@ -128,7 +140,7 @@ function MediaList({ type, keyword }) {
               style={{
                 padding: 10,
                 borderRadius: 10,
-                backgroundColor: filters.year === year ? 'purple' : '#222',
+                backgroundColor: filters.year === year ? 'red' : '#222',
 
               }}>
               <Text style={{ color: 'white' }}> {year}</Text>
@@ -148,7 +160,7 @@ function MediaList({ type, keyword }) {
               style={{
                 padding: 10,
                 borderRadius: 8,
-                backgroundColor: filters.genre === genre ? 'purple' : '#222',
+                backgroundColor: filters.genre === genre ? 'red' : '#222',
                 margin: 5,
               }}
             >
@@ -160,26 +172,28 @@ function MediaList({ type, keyword }) {
         {/* Apply / Close */}
         <Pressable
           onPress={() => setShowFilter(false)}
-          style={{ backgroundColor: 'purple', padding: 12, borderRadius: 8, marginTop: 15 }}
+          style={{ backgroundColor: 'red', padding: 12, borderRadius: 8, marginTop: 15 }}
         >
           <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Apply Filters</Text>
         </Pressable>
       </View>
       )}
 
-
-
-
       {!selectedMovie && (
-        <FlatList
-          data={movies.filter(m =>
-            activeTab === 'inApp' ? m.source === 'in-app' :
-              activeTab === 'youtube' ? m.source === 'youtube' : true
-          )}
+        <LinearGradient colors={['#0a0a0a', '#111', '#222']} style={{ flex: 1 }}>
+          <FlatList
+            data={movies.filter(m =>
+              activeTab === 'inApp' ? m.source === 'in-app' :
+                activeTab === 'youtube' ? m.source === 'youtube' : true
+            )}
 
-          keyExtractor={item => item._id}
-          renderItem={({ item }) => <MovieItem item={item} onPress={openVideo} />}
-        />
+            keyExtractor={item => item._id}
+            renderItem={({ item }) => <MovieCard item={item} onPress={openVideo} />}
+            numColumns={2}
+            columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 15 }}
+            contentContainerStyle={{ padding: 10 }}
+          />
+        </LinearGradient>
       )}
 
       {/* Movie list */}
@@ -198,16 +212,37 @@ function MediaList({ type, keyword }) {
             zIndex: 1000,
           }}
         >
-          <WebView
-            source={{ uri: selectedMovie.url.replace('watch?v=', 'embed/') + '?modestbranding=1&playsinline=1' }}
-            style={{ width: screenWidth, height: screenHeight }}
-            javaScriptEnabled
-            domStorageEnabled
-            allowsFullscreenVideo
-            scalesPageToFit={true}
-            mediaPlaybackRequiresUserAction={false}
-            cacheEnabled={true}
-          />
+          {!webviewError ? (
+            <YoutubePlayer
+              height={screenHeight}
+              width={screenWidth}
+              videoId={getVideoId(selectedMovie.url)}
+              play={true}
+              onError={e => {
+                console.log('YouTube player error:', e);
+                setWebviewError(true); // fallback if video blocked
+              }}
+              onChangeState={state => console.log('Player state:', state)}
+            />
+
+          ) : (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+              <Text style={{ color: 'white', marginBottom: 20, textAlign: 'center' }}>Video cannot be played inside the app. You can open it in YouTube.</Text>
+              <Pressable
+                onPress={() => openInYouTube(selectedMovie.url)}
+                style={{ backgroundColor: 'red', padding: 12, borderRadius: 8, marginBottom: 10 }}
+              >
+                <Text style={{ color: 'white' }}>Open in YouTube</Text>
+              </Pressable>
+              <Pressable
+                onPress={closeVideo}
+                style={{ backgroundColor: 'red', padding: 12, borderRadius: 8 }}
+              >
+                <Text style={{ color: 'white' }}>Close</Text>
+              </Pressable>
+            </View>
+          )}
+
           <Pressable
             onPress={closeVideo}
             style={{
@@ -226,8 +261,6 @@ function MediaList({ type, keyword }) {
     </View>
   );
 }
-
-
 
 // Screens
 function MusicScreen() {
@@ -253,6 +286,35 @@ function DownloadScreen() {
     </View>
   );
 }
+function getEmbedUrl(url) {
+  if (!url) return '';
+  let videoId = null;
+  try {
+    if (url.includes('watch?v=')) {
+      videoId = url.split('watch?v=')[1].split('&')[0];
+    } else if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1].split('?')[0];
+    } else if (url.includes('embed/')) {
+      videoId = url.split('embed/')[1].split('?')[0];
+    }
+  } catch (e) {
+    console.log('getEmbedUrl parse error', e);
+  }
+  if (!videoId) return url; // fallback
+  return `https://www.youtube.com/embed/${videoId}?rel=0&controls=1&autoplay=1`;
+}
+
+function getVideoId(url) {
+  if (!url) return null;
+  try {
+    if (url.includes('watch?v=')) return url.split('watch?v=')[1].split('&')[0];
+    if (url.includes('youtu.be/')) return url.split('youtu.be/')[1].split('?')[0];
+    if (url.includes('embed/')) return url.split('embed/')[1].split('?')[0];
+  } catch (e) {
+    console.log('getVideoId parse error', e);
+  }
+  return null;
+}
 
 const TopTab = createMaterialTopTabNavigator();
 
@@ -264,12 +326,13 @@ function MoviesTopTabs() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
       {/* Header */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10 }}>
-        <Pressable onPress={() => {
-          setKeyword('');
-          setShowSearch(false);
-        }}>
-          <Text style={{ color: 'white', fontSize: 22, fontWeight: 'bold' }}>MINIYT</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, marginTop: 20 }}>
+        <Pressable
+          onPress={() => {
+            setKeyword('');
+            setShowSearch(false);
+          }}>
+          <Text style={{ color: 'white', fontSize: 22, fontWeight: 'bold' }}>Amflix</Text>
         </Pressable>
         <Pressable onPress={() => setShowSearch(prev => !prev)}>
           <MaterialCommunityIcons name="magnify" size={26} color="white" />
@@ -295,14 +358,13 @@ function MoviesTopTabs() {
         />
       )}
 
-
       {/* Top Tabs */}
       <TopTab.Navigator
         screenOptions={{
           tabBarActiveTintColor: 'white',
           tabBarInactiveTintColor: 'gray',
           tabBarStyle: { backgroundColor: 'black' },
-          tabBarIndicatorStyle: { backgroundColor: 'purple' },
+          tabBarIndicatorStyle: { backgroundColor: 'red' },
         }}
       >
         <TopTab.Screen name="All" options={{ title: 'All' }}>
@@ -319,8 +381,6 @@ function MoviesTopTabs() {
   );
 }
 
-
-
 // Bottom tab
 const Tab = createBottomTabNavigator();
 export default function App() {
@@ -333,13 +393,11 @@ export default function App() {
     </Tab.Navigator>
   );
 }
-
-
 const styles = StyleSheet.create({
   thumbnail: { width: 120, height: 70 },
   title: { fontWeight: 'bold', fontSize: 16, marginBottom: 3, color: 'white' },
   container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  itemContainer: { flexDirection: 'row', marginBottom: 10 },
+  itemContainer: { flexDirection: 'row', marginBottom: 10, },
   textContainer: { flex: 1, justifyContent: 'center', marginLeft: 10 }
 
 });
