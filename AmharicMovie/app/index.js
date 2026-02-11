@@ -2,14 +2,16 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useState } from 'react';
-import { Dimensions, FlatList, Linking, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Dimensions, Easing, FlatList, Image, Linking, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import MovieCard from '../components/MovieCard';
+
 // Movie item component
 
 function MediaList({ type, keyword }) {
   const [activeTab, setActiveTab] = useState('inApp');
+
   const [filters, setFilters] = useState({
     year: null,
     rating: null,
@@ -23,7 +25,10 @@ function MediaList({ type, keyword }) {
   const [loading, setLoading] = useState(true);
   const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
   const [screenHeight, setScreenHeight] = useState(Dimensions.get('window').height);
-
+  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [allMovies, setAllMovies] = useState([]);
+  const ITEM_WIDTH = 360
+  const TOTAL_WIDTH = ITEM_WIDTH * movies.length
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window: { width, height } }) => {
       setScreenWidth(width);
@@ -33,29 +38,48 @@ function MediaList({ type, keyword }) {
   }, []);
 
 
-
   useEffect(() => {
-    fetch('https://amharicmovie-backend.onrender.com/movies')
-      .then(res => {
-        console.log('Response status:', res.status);
-        return res.json();
-      })
+    fetch('https://amharicmovie-backend.onrender.com/trending')
+      .then(res => res.json())
       .then(data => {
-        setMovies(data);
+        console.log('API response:', data); // add this to see what it returns
+        const trendingMovies = Array.isArray(data)
+          ? data.map(item => item.movie)  // if data is array of { movie }
+          : Array.isArray(data.trending)
+            ? data.trending.map(item => item.movie)
+            : []; // fallback empty array
+        setMovies(trendingMovies);
         setLoading(false);
       })
       .catch(err => {
-        console.log('Fetch error:', err);
+        console.log('Trending fetch error:', err);
         setLoading(false);
       });
   }, []);
 
+
+  useEffect(() => {
+    if (!movies.length) return;
+    slideAnim.setValue(0)
+    const animation = Animated.timing(slideAnim, {
+      toValue: -TOTAL_WIDTH,
+      duration: 15000,
+      easing: Easing.linear,
+      useNativeDriver: true
+    })
+    Animated.loop(animation, {
+      resetBeforeIteration: false,
+
+    }).start();
+  }, [movies]);
+
+
   const filterMovies = (moviesList) => {
     return moviesList.filter(movie => {
-      if (filters.year && movie.year !== filters.year) return false;
+      if (filters.year && movie.year !== Number(filters.year)) return false;
       if (filters.rating && movie.rating < filters.rating) return false;
       if (filters.genre && !movie.genre.includes(filters.genre)) return false;
-      if (filters.keyword && !movie.title.toLowerCase().includes(filters.keyword.toLowerCase())) return false;
+      if (keyword && !movie.title.toLowerCase().includes(keyword.toLowerCase())) return false;
       return true;
     });
   };
@@ -90,11 +114,6 @@ function MediaList({ type, keyword }) {
     }
   };
 
-  if (loading) return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Loading movies...</Text>
-    </View>
-  );
   const displayedMovies = filterMovies(
     movies.filter(m =>
       type === 'all' ? true :
@@ -105,11 +124,30 @@ function MediaList({ type, keyword }) {
         activeTab === 'youtube' ? m.source === 'youtube' : true
     )
   );
+  console.log('MediaList movies count:', movies && movies.length);
+  console.log('displayedMovies count:', displayedMovies && displayedMovies.length);
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
+  const scale = useRef(new Animated.Value(1)).current;
+  const onPressIn = () => {
+    Animated.spring(scale, {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start()
+  }
+  const onPressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true
+    }).start()
+  }
+
 
 
   return (
     <View style={{ flex: 1, backgroundColor: 'black' }}>
-
 
       {/* Tab buttons */}
       <View style={{ flexDirection: 'row' }}>
@@ -124,141 +162,159 @@ function MediaList({ type, keyword }) {
           <MaterialCommunityIcons name="menu" size={30} color="white" />
         </Pressable>
       </View>
+      <ScrollView  >
 
-
-      {/* Movie list */}
-
-      {showFilter && (<View style={{ backgroundColor: 'black', padding: 10 }}>
-        <Text></Text>
-        <Text style={{ color: 'white' }}> Year</Text>
-        <Text>year</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-          {['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'].map(year => (
-            <Pressable
-              key={year}
-              onPress={() => setFilters({ ...filters, year })}
-              style={{
-                padding: 10,
-                borderRadius: 10,
-                backgroundColor: filters.year === year ? 'red' : '#222',
-
-              }}>
-              <Text style={{ color: 'white' }}> {year}</Text>
-            </Pressable>
-          )
-
-          )}
-
-        </View>
-        {/* Genre Filter */}
-        <Text style={{ color: 'white', marginVertical: 5 }}>Genre</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-          {['Action', 'Romance', 'Comedy', 'Drama'].map(genre => (
-            <Pressable
-              key={genre}
-              onPress={() => setFilters({ ...filters, genre })}
-              style={{
-                padding: 10,
-                borderRadius: 8,
-                backgroundColor: filters.genre === genre ? 'red' : '#222',
-                margin: 5,
-              }}
-            >
-              <Text style={{ color: 'white' }}>{genre}</Text>
-            </Pressable>
-          ))}
-        </View>
-
-        {/* Apply / Close */}
         <Pressable
-          onPress={() => setShowFilter(false)}
-          style={{ backgroundColor: 'red', padding: 12, borderRadius: 8, marginTop: 15 }}
+          onPressIn={onPressIn}
+          onPressOut={onPressOut}
+          onPress={() => movies && movies.length > 0 && openVideo(movies[currentIndex])}
         >
-          <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Apply Filters</Text>
-        </Pressable>
-      </View>
-      )}
-
-      {!selectedMovie && (
-        <LinearGradient colors={['#0a0a0a', '#111', '#222']} style={{ flex: 1 }}>
-          <FlatList
-            data={movies.filter(m =>
-              activeTab === 'inApp' ? m.source === 'in-app' :
-                activeTab === 'youtube' ? m.source === 'youtube' : true
-            )}
-
-            keyExtractor={item => item._id}
-            renderItem={({ item }) => <MovieCard item={item} onPress={openVideo} />}
-            numColumns={2}
-            columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 15 }}
-            contentContainerStyle={{ padding: 10 }}
-          />
-        </LinearGradient>
-      )}
-
-      {/* Movie list */}
-
-
-      {/* Fullscreen video */}
-      {selectedMovie && (
-        <View
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'black',
-            zIndex: 1000,
-          }}
-        >
-          {!webviewError ? (
-            <YoutubePlayer
-              height={screenHeight}
-              width={screenWidth}
-              videoId={getVideoId(selectedMovie.url)}
-              play={true}
-              onError={e => {
-                console.log('YouTube player error:', e);
-                setWebviewError(true); // fallback if video blocked
-              }}
-              onChangeState={state => console.log('Player state:', state)}
-            />
-
-          ) : (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-              <Text style={{ color: 'white', marginBottom: 20, textAlign: 'center' }}>Video cannot be played inside the app. You can open it in YouTube.</Text>
-              <Pressable
-                onPress={() => openInYouTube(selectedMovie.url)}
-                style={{ backgroundColor: 'red', padding: 12, borderRadius: 8, marginBottom: 10 }}
-              >
-                <Text style={{ color: 'white' }}>Open in YouTube</Text>
-              </Pressable>
-              <Pressable
-                onPress={closeVideo}
-                style={{ backgroundColor: 'red', padding: 12, borderRadius: 8 }}
-              >
-                <Text style={{ color: 'white' }}>Close</Text>
-              </Pressable>
-            </View>
-          )}
-
-          <Pressable
-            onPress={closeVideo}
+          <Animated.View
             style={{
-              position: 'absolute',
-              top: 40,
-              right: 20,
-              backgroundColor: 'red',
-              padding: 10,
-              borderRadius: 8,
+              flexDirection: 'row',
+              transform: [{ translateX: slideAnim }],
             }}
           >
-            <Text style={{ color: 'white', textAlign: 'center' }}>Close</Text>
+
+            {movies.map((movie, i) => (
+              <Image
+                key={i}
+                source={{ uri: movie.thumbnail }}
+                style={{ width: 350, height: 160, borderRadius: 16, marginRight: 10 }}
+              />
+            ))}
+          </Animated.View>
+        </Pressable>
+
+
+        {/* Movie list */}
+
+        {showFilter && (<View style={{ backgroundColor: 'black', padding: 10 }}>
+          <Text></Text>
+          <Text style={{ color: 'white' }}> Year</Text>
+          <Text>year</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+            {['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'].map(year => (
+              <Pressable
+                key={year}
+                onPress={() => setFilters({ ...filters, year })}
+                style={{
+                  padding: 10,
+                  borderRadius: 10,
+                  backgroundColor: filters.year === year ? 'red' : '#222',
+
+                }}>
+                <Text style={{ color: 'white' }}> {year}</Text>
+              </Pressable>
+            )
+            )}
+
+          </View>
+          {/* Genre Filter */}
+          <Text style={{ color: 'white', marginVertical: 5 }}>Genre</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+            {['Action', 'Romance', 'Comedy', 'Drama'].map(genre => (
+              <Pressable
+                key={genre}
+                onPress={() => setFilters({ ...filters, genre })}
+                style={{
+                  padding: 10,
+                  borderRadius: 8,
+                  backgroundColor: filters.genre === genre ? 'red' : '#222',
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: 'white' }}>{genre}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {/* Apply / Close */}
+          <Pressable
+            onPress={() => setShowFilter(false)}
+            style={{ backgroundColor: 'red', padding: 12, borderRadius: 8, marginTop: 15 }}
+          >
+            <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Apply Filters</Text>
           </Pressable>
         </View>
-      )}
+        )}
+
+        {!selectedMovie && (
+          <LinearGradient colors={['#0a0a0a', '#111', '#222']} style={{ flex: 1 }}>
+            <FlatList
+              data={displayedMovies}
+
+              keyExtractor={(item, index) => item._id || item.id || item.title ? (item._id || item.id || item.title) : String(index)}
+              renderItem={({ item }) => item ? <MovieCard item={item} onPress={openVideo} /> : null}
+              numColumns={2}
+              columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 15 }}
+              contentContainerStyle={{ padding: 10 }}
+            />
+          </LinearGradient>
+        )}
+
+        {/* Fullscreen video */}
+        {selectedMovie && (
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'black',
+              zIndex: 1000,
+            }}
+          >
+            {!webviewError ? (
+              <YoutubePlayer
+                height={screenHeight}
+                width={screenWidth}
+                videoId={getVideoId(selectedMovie.url)}
+                play={true}
+                onError={e => {
+                  console.log('YouTube player error:', e);
+                  setWebviewError(true); // fallback if video blocked
+                }}
+                onChangeState={state => console.log('Player state:', state)}
+              />
+
+            ) : (
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+                <Text style={{ color: 'white', marginBottom: 20, textAlign: 'center' }}>Video cannot be played inside the app. You can open it in YouTube.</Text>
+                <Pressable
+                  onPress={() => openInYouTube(selectedMovie.url)}
+                  style={{ backgroundColor: 'red', padding: 12, borderRadius: 8, marginBottom: 10 }}
+                >
+                  <Text style={{ color: 'white' }}>Open in YouTube</Text>
+                </Pressable>
+                <Pressable
+                  onPress={closeVideo}
+                  style={{ backgroundColor: 'red', padding: 12, borderRadius: 8 }}
+                >
+                  <Text style={{ color: 'white' }}>Close</Text>
+                </Pressable>
+              </View>
+            )}
+
+            <Pressable
+              onPress={closeVideo}
+              style={{
+                position: 'absolute',
+                top: 40,
+                right: 20,
+                backgroundColor: 'red',
+                padding: 10,
+                borderRadius: 8,
+              }}
+            >
+              <Text style={{ color: 'white', textAlign: 'center' }}>Close</Text>
+            </Pressable>
+          </View>
+        )}
+      </ScrollView>
     </View>
+
   );
 }
 
@@ -374,7 +430,7 @@ function MoviesTopTabs() {
           {() => <MediaList type="movie" keyword={keyword} />}
         </TopTab.Screen>
         <TopTab.Screen name="TVSeries" options={{ title: 'TV / Series' }}>
-          {() => <MediaList type="tvseries" keyword={keyword} />}
+          {() => <MediaList type="tvSeries" keyword={keyword} />}
         </TopTab.Screen>
       </TopTab.Navigator>
     </SafeAreaView>
